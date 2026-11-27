@@ -1,0 +1,83 @@
+\documentclass[11pt,a4paper]{amsart}
+\usepackage[hmargin=.83in,vmargin=.72in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amssymb}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={Soft repair with two functional dependencies sharing a left-hand side}}
+\urlstyle{same}
+\setlength{\emergencystretch}{2em}
+\linespread{0.95}
+\DeclareMathSizes{8}{8}{8}{8}
+\DeclareMathSizes{9}{9}{8}{8}
+\DeclareMathSizes{10.95}{10.95}{8}{8}
+\renewcommand{\bibliofont}{\normalsize\raggedright}
+\newtheorem{theorem}{Theorem}
+\newcommand{\cost}{\operatorname{cost}}
+\newcommand{\vio}{\operatorname{vio}}
+\title[Soft repair with a common left-hand side]{Soft repair with two functional dependencies sharing a left-hand side}
+\date{}
+\begin{document}
+\begin{abstract}
+Carmeli, Grohe, Kimelfeld, Livshits and Tibi ask for the complexity of soft database repair with the fixed dependencies $A\to B$ and $A\to C$. We prove the threshold decision problem NP-complete and exact optimization NP-hard, even in one $A$-block, with a common positive integer deletion weight and penalty one for $A\to C$. A large finite penalty for $A\to B$ forces a prescribed number of full $B$-blocks. Equal $C$-labels then reward exactly the edges induced by the selected vertices.
+\end{abstract}
+\maketitle
+
+\section{The soft repair objective}
+Let $D$ be a finite set of distinct facts over the fixed schema $R(A,B,C)$, and let $\Delta=\{A\to B,A\to C\}$. An unordered pair violates $X\to Y$ if it agrees on $X$ and disagrees on $Y$. With supplied nonnegative rational deletion weights $w_f$ and dependency penalties $w_\varphi$, the cost of retaining $E\subseteq D$ is
+\[
+  \cost(E\mid D)=\sum_{f\in D\setminus E}w_f+
+          \sum_{\varphi\in\Delta}w_\varphi|\vio(E,\varphi)|.
+\]
+The threshold problem asks whether some $E$ has cost at most a given rational $T$. This is the objective of Carmeli et al.\ \cite[Equation~(1)]{journal}, who list the specific $\Delta$ as the first open case in their conclusion \cite[Section~7]{journal}. It is also the first listed open case in their conference version \cite[Section~6, p.~16:16]{conference}. A pair violating both dependencies pays both penalties. In the hard-constraint setting the two dependencies are equivalent to $A\to BC$, but one soft penalty for $A\to BC$ would count a pair only once. This distinction is why the single-dependency algorithm does not answer the question.
+
+\begin{theorem}
+The threshold problem for $\Delta$ over $R(A,B,C)$ is NP-complete. It remains NP-hard when every fact has the same $A$-value and the same positive integer deletion weight, the penalty for $A\to C$ is one, and all numerical values are polynomially bounded integers. Exact optimization is NP-hard.
+\end{theorem}
+\begin{proof}
+For membership, guess the retained subset and count the two kinds of violations over unordered pairs. Binary rational arithmetic computes the exact cost in polynomial time: products of input denominators have total bit length bounded by the sum of their bit lengths, and a common denominator suffices. We turn to hardness.
+
+\medskip
+\noindent\textbf{Tuples and weights.}
+Reduce from CLIQUE \cite{karp} on a simple graph $G$ with $n$ vertices and target size $1\le k\le n$. Let $r=\max\{2,\max_v\deg(v)\}$. Every fact has the same $A$-value. For a vertex $v$, create a $B$-block with $B$-value $v$. For every incident edge $e$ put in one fact with $C$-label $c_e$. That label is shared precisely by the two endpoint blocks. Pad each block to $r$ facts with globally unique $C$-labels. The relation contains $N=nr$ distinct facts. Set the penalty for $A\to B$ to $W=2N^2$ and that for $A\to C$ to one. Set every deletion weight to
+\[
+             w=Wr(2k-1)/2 .
+\]
+
+\medskip
+\noindent\textbf{Forcing full blocks.}
+Write $d_v$ for the count retained in block $v$, $M=\sum_v d_v$, and $C(E)$ for the number of $A\to C$ violations. The cost equals $wN-[P(E)-C(E)]$, where
+\[
+ P(E)=wM-W\left[\binom M2-\sum_v\binom{d_v}{2}\right].
+\]
+The term $C(E)$ lies between zero and $\binom N2<W$. For a fixed retained size $M$, maximizing $P$ amounts to maximizing $\sum_v\binom{d_v}{2}$. If $0<d_i\le d_j<r$, transferring one unit from $i$ to $j$ increases this sum by $d_j-d_i+1>0$. Counts after such a move are feasible, since each block has $r$ facts. Thus only full blocks, at most one partial block, and empty blocks attain the maximum.
+
+Write $M=\ell r+s$ with $0\le s<r$. In a packed arrangement the minimum number of $A\to B$ violations is $r^2\binom{\ell}{2}+\ell r s$, from pairs between full blocks and between the partial block and full blocks. Passing from size $M$ to $M+1$ increases this number by $\ell r$, including when the partial block fills. Hence the increment of the primary optimum $P_{\max}(M)$ is $w-W\ell r$. This is at least $Wr/2$ for $\ell\le k-1$ and at most $-Wr/2$ for $\ell\ge k$. The unique maximizing retained size is $kr$.
+
+Every other retained size loses at least $Wr/2\ge W$ in $P$ relative to the optimum. A nonpacked count vector at size $kr$ loses at least $W$, because its binomial sum is smaller by a positive integer. The difference in $C(E)$ between any two retained sets is strictly less than $W$. Therefore every optimal retained set consists of exactly $k$ full blocks.
+
+\medskip
+\noindent\textbf{Detecting clique edges.}
+For $k$ full blocks indexed by a vertex set $U$, the only equal-$C$ pairs are the pairs with the same edge label. There is one for each edge internal to $U$. Thus
+\[
+   C(E)=\binom{kr}{2}-|E(G[U])|.
+\]
+It follows that $G$ has a $k$-clique exactly when optimal cost is at most
+\[
+ T_\star=w(N-kr)+Wr^2\binom{k}{2}+\binom{kr}{2}-\binom k2.
+\]
+The tuple construction, supplied weights and threshold have polynomial encoding length. In fact $r\le N$, $rk\le N$, $W=2N^2$, $w\le WN$, and all terms of the threshold are polynomially bounded in $N$. This proves the threshold and optimization claims.
+\end{proof}
+
+\section{Worked example and scope}
+Take a triangle on vertices $1,2,3$ and an isolated vertex $4$, with target $k=3$. Here $r=2$, $N=8$, $W=128$ and $w=640$. Keeping blocks $1,2,3$ pays $1280$ for deletions, $1536$ for $A\to B$, and $12$ for $A\to C$, for total $2828=T_\star$. Keeping $1,2,4$ has the same first two costs and pays $14$ for $A\to C$, since only edge $12$ contributes an equal label. Both tuples of block $4$ use unique padding labels.
+
+The schema and dependencies are fixed in the data-complexity sense. The reduction uses supplied numerical costs, including the common deletion weight and the large finite penalty. A family with all numerical weights fixed constants is outside this theorem.
+
+\section*{Replay and technical disclosure}
+The standard-library replay checks all labeled graphs on at most four vertices and all targets, exhaustively scoring retained subsets. It independently checks the worked fixture. The argument above proves the general claim. External peer review and formal verification are pending.
+
+ChatGPT Astra 6.2 (OpenAI) generated the recovered proof and original replay under human direction. OpenAI Codex independently reviewed the mathematics. GPT-6.2 Sol (OpenAI) checked primary sources and prepared the manuscript, extended replay and illustration. DannyExperiments is the project citation identity.
+
+\bibliographystyle{amsplain}
+\bibliography{references}
+\end{document}

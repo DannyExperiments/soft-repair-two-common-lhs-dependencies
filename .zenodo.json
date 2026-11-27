@@ -1,0 +1,32 @@
+{
+  "title": "Soft repair with two functional dependencies sharing a left-hand side",
+  "upload_type": "software",
+  "publication_date": "2026-11-27",
+  "version": "1.0.0",
+  "creators": [
+    {
+      "name": "DannyExperiments"
+    }
+  ],
+  "keywords": [
+    "database repair",
+    "functional dependencies",
+    "soft constraints",
+    "data complexity",
+    "NP-completeness",
+    "subset repair",
+    "clique reduction",
+    "pairwise penalties"
+  ],
+  "description": "<p>This note resolves the exact soft-repair complexity of the fixed schema R(A,B,C) with separately penalized A→B and A→C. The case is the first open dependency set in Carmeli, Grohe, Kimelfeld, Livshits and Tibi&#x27;s 2024 ACM TODS article, also listed in the 2021 ICDT version. Threshold decision is NP-complete and exact optimization is NP-hard. Hardness holds when all facts share one A value and one positive integer deletion weight, and the A→C penalty is one.</p><p>The reduction creates one equal-size B block per graph vertex. For each edge, its endpoints share one C label. The large finite A→B penalty and common deletion weight make every optimum select exactly k full blocks. At a fixed retained size, packing minimizes cross-block B violations; the primary score peaks when exactly k blocks are full. The number of remaining equal C pairs then matches the count of edges induced by the chosen vertices. An optimum reaches the clique threshold exactly when the chosen blocks form a clique.</p><p>Retained pairs are evaluated separately for each dependency, and a pair violating both pays both costs. Their conjunction is equivalent to A→BC under hard constraints, but a single soft A→BC penalty charges a different objective. The source&#x27;s single-dependency, soft matching and hard-repair results therefore do not give this classification. Numerical penalties are input and are polynomially bounded integers in the reduction; the all-fixed-weights problem remains outside the theorem.</p><p>The release includes the manuscript, LaTeX, bibliography, citation metadata, checksum ledger and complete evidence archive. The standard-library replay checks 285 small graph/target cases and 105,252 retained-subset scores, with an independent pairwise calculation of the 256 repairs of the worked example. Its triangle costs 2,828, while a nonclique choice of three full blocks costs 2,830. The rotating figure and offline explorer expose every subset&#x27;s costs. External peer review and formal verification are pending.</p><p>ChatGPT Astra 6.2 (OpenAI) generated the recovered proof and original replay under human direction. OpenAI Codex independently reviewed the mathematics. GPT-6.2 Sol (OpenAI) checked primary sources and prepared the manuscript, extended replay and illustration. DannyExperiments is the project citation identity.</p>",
+  "access_right": "open",
+  "license": "other-closed",
+  "notes": "All rights reserved. Publicly downloadable files are supplied without a repository-wide reuse license.",
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/DannyExperiments/soft-repair-two-common-lhs-dependencies/releases/tag/v1.0.0",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    }
+  ]
+}

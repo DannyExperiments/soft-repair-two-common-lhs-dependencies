@@ -1,0 +1,2 @@
+285 graph/target cases; 105252 exhaustive subset scores reused across targets.
+All 256 example subsets checked by direct pair scoring. Triangle cost 2828; blocks 1,2,4 cost 2830.

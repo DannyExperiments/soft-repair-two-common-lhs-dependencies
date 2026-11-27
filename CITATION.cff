@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "Cite this version of the research release."
+type: software
+title: "Soft repair with two functional dependencies sharing a left-hand side"
+authors:
+  - name: "DannyExperiments"
+version: "1.0.0"
+date-released: 2026-11-27
+doi: "10.5281/zenodo.24572919"
+url: "https://doi.org/10.5281/zenodo.24572919"
+repository-code: "https://github.com/DannyExperiments/soft-repair-two-common-lhs-dependencies"
+keywords:
+  - "database repair"
+  - "functional dependencies"
+  - "soft constraints"
+  - "data complexity"
+  - "NP-completeness"
+  - "subset repair"
+  - "clique reduction"
+  - "pairwise penalties"
+preferred-citation:
+  type: software
+  title: "Soft repair with two functional dependencies sharing a left-hand side"
+  authors:
+    - name: "DannyExperiments"
+  version: "1.0.0"
+  date-released: 2026-11-27
+  doi: "10.5281/zenodo.24572919"
+  url: "https://doi.org/10.5281/zenodo.24572919"
+  repository-code: "https://github.com/DannyExperiments/soft-repair-two-common-lhs-dependencies"

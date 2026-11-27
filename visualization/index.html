@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Soft repair of four blocks</title>
+<style>
+:root{color-scheme:dark;--bg:#101b32;--panel:#162640;--edge:#415c80;--text:#f7faff;--muted:#c2cee1;--mint:#6aead7;--amber:#ffd086}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,sans-serif}
+main{max-width:660px;margin:auto;padding:22px 16px 32px}
+h1{font-size:clamp(1.7rem,5.2vw,2.6rem);line-height:1.12;margin:0}
+header p,details{color:var(--muted)}header p{margin:.45rem 0 1rem}
+fieldset{border:0;margin:.3rem 0 .7rem;padding:0;min-width:0;display:flex;gap:7px;flex-wrap:wrap}
+legend{color:var(--muted);margin-bottom:4px}
+button{min-width:46px;min-height:46px;padding:7px 9px;border:1px solid var(--edge);border-radius:9px;background:#233958;color:var(--text);font:inherit;font-weight:660;cursor:pointer}
+button[aria-pressed=true]{background:var(--mint);color:var(--bg)}
+button:focus-visible,#chart:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.diagram,.numbers{background:var(--panel);border:1px solid var(--edge);border-radius:14px;overflow:hidden}
+#chart{display:block;width:100%;height:auto;touch-action:pan-y;cursor:grab}
+#chart:active{cursor:grabbing}#chart:focus-visible{outline-offset:-5px}
+text{text-anchor:middle;font-family:system-ui,sans-serif;fill:var(--text);font-size:19px}
+.numbers{margin-top:.65rem;padding:.65rem .75rem}.numbers p{margin:.18rem 0}
+#score{font-size:1.12rem;font-weight:720;color:var(--mint)}
+details{margin-top:1rem}summary{cursor:pointer;color:var(--text);font-weight:700}
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1>Soft repair of four blocks</h1>
+<p>Choose which facts to retain. Removing a fact costs 640. Retained pairs pay 128 if their B blocks differ and 1 if their C labels differ.</p>
+</header>
+<fieldset>
+<legend>Examples</legend>
+<button id="partial">Partial</button><button id="nonclique">Nonclique</button><button id="triangle">Triangle</button>
+</fieldset>
+<fieldset id="controls">
+<legend>Retained facts, by block and C label</legend>
+<button id="c0" aria-label="Block 1, label 12">1·12</button>
+<button id="c1" aria-label="Block 1, label 13">1·13</button>
+<button id="c2" aria-label="Block 2, label 12">2·12</button>
+<button id="c3" aria-label="Block 2, label 23">2·23</button>
+<button id="c4" aria-label="Block 3, label 13">3·13</button>
+<button id="c5" aria-label="Block 3, label 23">3·23</button>
+<button id="c6" aria-label="Block 4, label p">4·p</button>
+<button id="c7" aria-label="Block 4, label q">4·q</button>
+</fieldset>
+<div class="diagram">
+<svg id="chart" viewBox="0 0 450 245" role="img" tabindex="0" aria-labelledby="plotTitle plotDesc">
+<title id="plotTitle">Tuple blocks and common C labels</title>
+<desc id="plotDesc">Each column is a B block. Each square shows a C label. Green links join retained equal labels, which avoid the C penalty.</desc>
+<g id="plot"></g>
+</svg>
+</div>
+<div class="numbers" aria-live="polite" aria-atomic="true">
+<p id="score"></p>
+<p id="delete"></p>
+<p id="bcost"></p>
+<p id="ccost"></p>
+</div>
+<details>
+<summary>Why the triangle is cheaper</summary>
+<p>Blocks 1, 2 and 3 come from a triangle. Block 4 is isolated and uses private padding labels p and q. Each retained pair with a shared label avoids one unit of C cost. Among three full blocks, holding the deletion and B penalties fixed, the triangle minimizes C cost by sharing all three edge labels.</p>
+<p>Drag sideways or focus the plot and use the arrow keys.</p>
+</details>
+</main>
+<script>
+"use strict";
+const byId=id=>document.getElementById(id), chart=byId("chart"),layer=byId("plot");
+const facts=[[1,"12"],[1,"13"],[2,"12"],[2,"23"],[3,"13"],[3,"23"],[4,"p"],[4,"q"]];
+let mask=63,angle=.40,drag=null;
+const polygon=(points,fill)=>'<polygon points="'+points.map(p=>p.join(",")).join(" ")+'" fill="'+fill+'" stroke="#182b44"/>';
+function render(){
+  const active=facts.map((_,i)=>Boolean(mask & 1<<i));
+  const m=active.filter(Boolean).length, pairs=[];
+  for(let i=0;i<8;i++)for(let j=i+1;j<8;j++)if(active[i]&&active[j])pairs.push([i,j]);
+  const b=pairs.filter(([i,j])=>facts[i][0]!==facts[j][0]).length;
+  const c=pairs.filter(([i,j])=>facts[i][1]!==facts[j][1]).length;
+  const removed=640*(8-m), total=removed+128*b+c;
+  byId("score").textContent="Total cost "+total+"; retained "+m+" of 8.";
+  byId("delete").textContent="Deletion cost "+removed+".";
+  byId("bcost").textContent="B penalty "+128*b+" from "+b+" disagreeing pairs.";
+  byId("ccost").textContent="C penalty "+c+"; "+(pairs.length-c)+" equal-label pairs.";
+  facts.forEach((_,i)=>byId("c"+i).setAttribute("aria-pressed",active[i]));
+  const hop=6*Math.sin(angle),skew=9+5*Math.cos(angle);
+  const points=facts.map((_,i)=>[64+107*Math.floor(i/2)+(i%2?-hop:hop),70+(i%2)*90+(Math.floor(i/2)-1.5)*hop]);
+  let shape="";
+  for(const [i,j] of pairs.filter(([i,j])=>facts[i][1]===facts[j][1])){
+    const [a,b]=points[i],[c,d]=points[j];
+    shape+='<path d="M '+a+' '+b+' Q '+(a+c)/2+' '+((b+d)/2-43)+' '+c+' '+d+'" fill="none" stroke="#6aead7" stroke-width="4"/>';
+  }
+  points.forEach(([x,y],i)=>{
+    const palette=active[i]?["#497b91","#365674","#254d69"]:["#3a4d6a","#283a56","#24324d"];
+    shape+=polygon([[x-23,y-16],[x-23+skew,y-26],[x+23+skew,y-26],[x+23,y-16]],palette[0]);
+    shape+=polygon([[x+23,y-16],[x+23+skew,y-26],[x+23+skew,y+6],[x+23,y+16]],palette[1]);
+    shape+=polygon([[x-23,y-16],[x+23,y-16],[x+23,y+16],[x-23,y+16]],palette[2]);
+    shape+='<text x="'+x+'" y="'+(y+7)+'">'+facts[i][1]+'</text>';
+    if(i%2)shape+='<text x="'+x+'" y="225">'+facts[i][0]+'</text>';
+  });
+  layer.innerHTML=shape;
+}
+facts.forEach((_,i)=>byId("c"+i).addEventListener("click",()=>{mask^=1<<i;render();}));
+[[31,"partial"],[207,"nonclique"],[63,"triangle"]].forEach(([value,id])=>byId(id).addEventListener("click",()=>{mask=value;render();}));
+chart.addEventListener("pointerdown",e=>{drag=e.clientX;chart.setPointerCapture(e.pointerId);});
+chart.addEventListener("pointermove",e=>{if(drag!==null){angle+=(e.clientX-drag)/85;drag=e.clientX;render();}});
+chart.addEventListener("lostpointercapture",()=>{drag=null;});
+chart.addEventListener("keydown",e=>{
+  if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight")return;
+  e.preventDefault();angle+=e.key==="ArrowLeft"?-.12:.12;render();
+});
+render();
+</script>
+</body>
+</html>
